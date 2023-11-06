@@ -1,135 +1,221 @@
 <template>
-    <div class="weather-container">
-      <div class="search-input">
-        <input v-model="city" @keyup.enter="getWeather" placeholder="Enter city" >
-        <i class="fas fa-search"></i>
-        <!-- <i class="fa fa-filter" aria-hidden="true"></i> -->
-      </div>
-      
-      <div v-if="weather" class="info-weather">
-        <!-- <h2>köln</h2> -->
+  <div class="container d-flex flex-column vh-100">
+    <div class="row align-items-center justify-content-center flex-fill">
 
-        <div style="border-top: 2px solid #c7c5c5;">
-          <div style="display: grid; grid-template-columns:50% 50%; border-bottom: 2px solid #c7c5c5;">
-            <p>{{ today.weekday }}</p>
-            <p>{{ today.date }}</p>
-          </div>
-          <div style="display: grid; grid-template-columns:50% 50%; justify-items: center; align-items: center;">
-            <img :src="require('@/assets/' + today.icon + '.png')" alt="Weather Icon" style="height: 40px; width: auto;">
-            <p>{{ today.temp }}°C</p>
-          </div>
-          <p>{{ today.description }}</p>
-        </div>
-      </div>
+      <div class="col-10 col-md-4">
 
-      <div v-if="weather" class="info-weather">
-        <div style="display: grid; grid-template-columns:50% 50%; border-bottom: 2px solid #c7c5c5;">
-          <p>{{ tomorrow.weekday }}</p>
-          <p>{{ tomorrow.date }}</p>
+        <div class="search-input">
+          <input v-model="city" @keyup.enter="getWeather" placeholder="Stadt eingeben">
+          <i class="fas fa-search"></i>
         </div>
-        <div style="display: grid; grid-template-columns:50% 50%; justify-items: center; align-items: center;">
-          <img :src="require('@/assets/' + tomorrow.icon + '.png')" alt="Weather Icon" style="height: 40px; width: auto;">
-          <p>{{ tomorrow.temp }}°C</p>
-        </div>
-        <p>{{ tomorrow.description }}</p>
-      </div>
 
-      <div v-if="weather" class="info-weather">
-        <div style="display: grid; grid-template-columns:50% 50%; border-bottom: 2px solid #c7c5c5;">
-          <p>{{ afterTomorrow.weekday }}</p>
-          <p>{{ afterTomorrow.date }}</p>
-        </div>
-        <div style="display: grid; grid-template-columns:50% 50%; justify-items: center; align-items: center;">
-          <img :src="require('@/assets/' + afterTomorrow.icon + '.png')" alt="Weather Icon" style="height: 40px; width: auto;">
-          <p>{{ afterTomorrow.temp }}°C</p>
-        </div>
-        <p>{{ afterTomorrow.description }}</p>
       </div>
-
     </div>
-  </template>
+    <div v-if="weatherData.length" class="row justify-content-md-around justify-content-center flex-fill">
+      <div v-for="weather in weatherData" :key="weather.id" class="col-10 col-md-3 ">
+        <div class="info-weather px-4">
+
+          <div class="row border-date">
+            <div class="col-6 my-2 p-0 text-start">{{ weather.weekday }}</div>
+            <div class="col-6 my-2 p-0 text-end">{{ weather.date }}</div>
+          </div>
+
+          <div class="row align-items-center justify-content-center">
+            <div class="col-4 p-0 my-2">
+              <div class="temp-icon"
+                :class="{ 'temp-icon-day': weather.icon.includes('d'), 'temp-icon-night': weather.icon.includes('n') }">
+                <img :src="require('@/assets/' + weather.icon + '.png')" alt="Weather Icon">
+              </div>
+            </div>
+
+            <div class="col-8 p-0 my-2 text-center">
+              <div v-if="weather.temp"> Aktuell: {{ weather.temp }}°C</div>
+              <div>Min: {{ weather.min }}°C </div>
+              <div>Max: {{ weather.max }}°C</div>
+              <div class="mt-2">{{ weather.description }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- <errorDisplay /> -->
+    <div v-if="error" class="row justify-content-md-around justify-content-center flex-fill">
+    <div class="col-10 col-md-4">
+      <div class="info-weather px-4">
+        <div class="row border-date">
+          <div class="col-6 my-2 p-0">FEHLER</div>
+        </div>
+
+        <div class="row align-items-center">
+          <div class="col-12 p-0 my-2">
+            Stadt nicht gefunden!
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  </div>
+</template>
   
-  <script>
-    import '@/css/styles.css';
+<script>
+import '@/css/styles.scss';
+// import errorDisplay from './errorDisplay.vue';
 
-    export default {
-      data() {
-        return {
-          city: "Köln",
-          weather: null,
-          today: null,
-          tomorrow: null,
-          afterTomorrow: null
-        };
-      },
-      methods: {
-        async getWeather() {
-          try {
-            let coordResponse = await fetch(
-              `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&units=metric&appid=66470ec19c691c0e602d44a569165e8a`
-            );
-            if (coordResponse.ok) {
-              this.coord = await coordResponse.json();
-            } else {
-              console.error("Error fetching weather data");
-            }
-            
-            let weatherResponse = await fetch(
-              `https://api.openweathermap.org/data/2.5/forecast?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
-            );
-            if (weatherResponse.ok) {
-              this.weather = await weatherResponse.json();
-              this.getWeatherForDate(this.weather);
-            } else {
-              console.error("Error fetching weather data");
-            }
-          } catch (error) {
-            console.error("There was an error fetching the weather data:", error);
-          }
-        },
-        getWeatherForDate(data) {
-          const getWeatherForDate = (targetDate) => {
-            let closest = data.list[0]; 
-            for(let item of data.list) {
-              let currentDate = new Date(item.dt_txt);
-              if(currentDate.getDate() === targetDate.getDate() && currentDate.getMonth() === targetDate.getMonth()) {
-                if(Math.abs(currentDate.getHours() - 12) < Math.abs(new Date(closest.dt_txt).getHours() - 12)) {
-                  closest = item;
-                }
-              }
-            }
 
-            const weekdays = ["SONNTAG", "MONTAG", "DIENSTAG", "MITTWOCH", "DONNERSTAG", "FREITAG", "SAMSTAG"];
-            const dayName = weekdays[new Date(closest.dt_txt).getDay()];
-
-            return {
-              date: formatDate(closest.dt_txt),
-              description: closest.weather[0].description,
-              icon: closest.weather[0].icon,
-              temp: Math.floor(closest.main.temp),
-              weekday: dayName
-            };
-          }
-
-          function formatDate(dt_txt) {
-            const date = new Date(dt_txt);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-          }
-
-          const now = new Date();
-          this.today = getWeatherForDate(now);
-
-          const tomorrowDate = new Date(now);
-          tomorrowDate.setDate(now.getDate() + 1);
-          this.tomorrow = getWeatherForDate(tomorrowDate);
-
-          const afterTomorrowDate = new Date(now);
-          afterTomorrowDate.setDate(now.getDate() + 2);
-          this.afterTomorrow = getWeatherForDate(afterTomorrowDate);
-        }
-      },
+export default {
+  // components: {
+  //   errorDisplay
+  // },
+  data() {
+    return {
+      city: "",
+      weatherData: [],
+      error: false,
     };
-  </script>
+  },
+  methods: {
+    async getWeather() {
+      try {
+        let coordResponse = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&units=metric&appid=66470ec19c691c0e602d44a569165e8a`
+        );
+        if (coordResponse.ok) {
+          this.coord = await coordResponse.json();
+          this.error = false;
+
+          console.log('https://api.openweathermap.org/data/2.5/forecast?lat=' + this.coord.coord.lat + '&lon=' + this.coord.coord.lon + '&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric');
+
+          let currentWeatherResponse = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
+          );
+          let forecastResponse = await fetch(
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
+          );
+            if (currentWeatherResponse.ok && forecastResponse.ok) {
+
+            // Options for formatting the date
+            const dateOptions = { weekday: 'long', timeZone: 'Europe/Berlin' };
+
+            this.weatherData = [];
+            this.error = false;
+
+            const currentData = await currentWeatherResponse.json();
+            this.weatherData.push(
+              {
+                date: this.formatDate(new Date()),
+                description: currentData.weather[0].description,
+                icon: currentData.weather[0].icon,
+                temp: currentData.main.temp.toFixed(0),
+                min: currentData.main.temp_min.toFixed(0),
+                max: currentData.main.temp_max.toFixed(0),
+                weekday: this.getWeekdayNameForDate(new Date(), dateOptions)
+              }
+            );
+
+            const forecastData = await forecastResponse.json();
+            console.log(forecastData);
+            this.processForecastData(forecastData, dateOptions);
+          } else {
+            console.error("Error fetching weather data");
+            this.weatherData = [];
+            this.error = true;
+          }
+        } else {
+          console.error("Error fetching weather data");
+          this.weatherData = [];
+          this.error = true;
+        }
+      } catch (error) {
+        console.error("There was an error fetching the weather data:", error);
+        this.error = true;
+      }
+    },
+    processForecastData(apiWeatherData, dateOptions) {
+      const currentDate = new Date();
+
+      console.log(currentDate);
+
+      const getWeatherDataForDaysAhead = (daysAhead) => {
+        const date = new Date(currentDate);
+        date.setDate(currentDate.getDate() + daysAhead);
+        console.log('Date: ' + date);
+        const weatherForDay = apiWeatherData.list.filter((item) => calculateDayDifference(new Date(item.dt_txt)) === daysAhead);
+        const weatherInfo = getMiddleDayWeatherInfo(weatherForDay);
+        const tempData = findMinMaxTemperatures(weatherForDay);
+
+        return {
+          date: this.formatDate(date),
+          description: weatherInfo.description,
+          icon: weatherInfo.icon,
+          temp: null,
+          min: tempData.minTemp.toFixed(0),
+          max: tempData.maxTemp.toFixed(0),
+          weekday: this.getWeekdayNameForDate(date, dateOptions)
+        };
+      }
+
+      //Get weatherData for tommorow
+      this.weatherData.push(getWeatherDataForDaysAhead(1));
+      //Get weatherData for the day after tommorow
+      this.weatherData.push(getWeatherDataForDaysAhead(2));
+
+      console.log(this.weatherData);
+
+      // Function to calculate the day difference for an item to the currentDate
+      function calculateDayDifference(itemDate) {
+
+        const itemDateCopy = new Date(itemDate);
+        itemDateCopy.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+
+        const currentDateCopy = new Date(currentDate);
+        currentDateCopy.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+
+        const daysDifference = Math.floor((itemDateCopy - currentDateCopy) / (24 * 60 * 60 * 1000));
+        console.log("Daydifference: " + daysDifference);
+        return daysDifference;
+      }
+
+      function getMiddleDayWeatherInfo(weatherList) {
+        const middleIndex = Math.floor(weatherList.length / 2);
+
+        if (weatherList[middleIndex]) {
+          // Extract the description and icon from the middle weather data
+          const description = weatherList[middleIndex].weather[0].description;
+          const icon = weatherList[middleIndex].weather[0].icon;
+          return { description, icon };
+        } else {
+          return { description: 'No data', icon: 'na' };
+        }
+      }
+
+      function findMinMaxTemperatures(weatherList) {
+        if (!weatherList || weatherList.length === 0) {
+          return { minTemp: null, maxTemp: null };
+        }
+
+        const { minTemp, maxTemp } = weatherList.reduce(
+          (acc, item) => ({
+            minTemp: Math.min(acc.minTemp, item.main.temp),
+            maxTemp: Math.max(acc.maxTemp, item.main.temp),
+          }),
+          { minTemp: Infinity, maxTemp: -Infinity }
+        );
+        return { minTemp, maxTemp };
+      }
+    },
+
+    // Get the German weekday name for the date
+    getWeekdayNameForDate(date, dateOptions) {
+      return date.toLocaleDateString('de-DE', dateOptions);
+    },
+    formatDate(date) {
+      return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+  },
+};
+</script>
