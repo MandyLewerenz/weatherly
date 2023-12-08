@@ -42,21 +42,21 @@
 
     <!-- <errorDisplay /> -->
     <div v-if="error" class="row justify-content-md-around justify-content-center flex-fill">
-    <div class="col-10 col-md-4">
-      <div class="info-weather px-4">
-        <div class="row border-date">
-          <div class="col-6 my-2 p-0">FEHLER</div>
-        </div>
-
-        <div class="row align-items-center">
-          <div class="col-12 p-0 my-2">
-            Stadt nicht gefunden!
+      <div class="col-10 col-md-4">
+        <div class="info-weather px-4">
+          <div class="row border-date">
+            <div class="col-6 my-2 p-0">FEHLER</div>
           </div>
-        </div>
 
+          <div class="row align-items-center">
+            <div class="col-12 p-0 my-2">
+              Stadt nicht gefunden!
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
-  </div>
 
   </div>
 </template>
@@ -95,7 +95,7 @@ export default {
           let forecastResponse = await fetch(
             `https://api.openweathermap.org/data/2.5/forecast?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
           );
-            if (currentWeatherResponse.ok && forecastResponse.ok) {
+          if (currentWeatherResponse.ok && forecastResponse.ok) {
 
             // Options for formatting the date
             const dateOptions = { weekday: 'long', timeZone: 'Europe/Berlin' };
