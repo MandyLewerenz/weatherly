@@ -63,13 +63,8 @@
   
 <script>
 import '@/css/styles.scss';
-// import errorDisplay from './errorDisplay.vue';
-
 
 export default {
-  // components: {
-  //   errorDisplay
-  // },
   data() {
     return {
       city: "",
@@ -81,19 +76,17 @@ export default {
     async getWeather() {
       try {
         let coordResponse = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&units=metric&appid=66470ec19c691c0e602d44a569165e8a`
+          process.env.VUE_APP_API_WEATHER + `?q=${this.city}&units=metric&appid=`+ process.env.VUE_APP_API_KEY
         );
         if (coordResponse.ok) {
           this.coord = await coordResponse.json();
           this.error = false;
 
-          console.log('https://api.openweathermap.org/data/2.5/forecast?lat=' + this.coord.coord.lat + '&lon=' + this.coord.coord.lon + '&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric');
-
           let currentWeatherResponse = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
+            process.env.VUE_APP_API_WEATHER + `?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&exclude=daily&units=metric&appid=` + process.env.VUE_APP_API_KEY
           );
           let forecastResponse = await fetch(
-            `https://api.openweathermap.org/data/2.5/forecast?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&appid=66470ec19c691c0e602d44a569165e8a&exclude=daily&units=metric`
+            process.env.VUE_APP_API_FORECAST + `?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&exclude=daily&units=metric&appid=` + process.env.VUE_APP_API_KEY
           );
           if (currentWeatherResponse.ok && forecastResponse.ok) {
 
