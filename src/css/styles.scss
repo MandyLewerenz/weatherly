@@ -9,7 +9,6 @@
 
     .info-weather {
       background-color: rgba(255, 255, 255, 0.7);
-      margin-top: 20px;
       border-radius: 10px;
 
       h2 {
@@ -77,5 +76,11 @@
       .temp-icon {
         height: 85px;
         width: 85px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .show-weather {
+        padding-bottom: 20px;
       }
     }

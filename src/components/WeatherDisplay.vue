@@ -11,7 +11,7 @@
 
       </div>
     </div>
-    <div v-if="weatherData.length" class="row justify-content-md-around justify-content-center flex-fill">
+    <div v-if="weatherData.length" class="row justify-content-md-around justify-content-center flex-fill show-weather">
       <div v-for="weather in weatherData" :key="weather.id" class="col-10 col-md-3 ">
         <div class="info-weather px-4">
 
@@ -75,8 +75,9 @@ export default {
   methods: {
     async getWeather() {
       try {
+        this.city = this.city.trim();
         let coordResponse = await fetch(
-          process.env.VUE_APP_API_WEATHER + `?q=${this.city}&units=metric&appid=`+ process.env.VUE_APP_API_KEY
+          process.env.VUE_APP_API_WEATHER + `?q=${this.city}&units=metric&appid=` + process.env.VUE_APP_API_KEY
         );
         if (coordResponse.ok) {
           this.coord = await coordResponse.json();
