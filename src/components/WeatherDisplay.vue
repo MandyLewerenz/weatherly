@@ -6,7 +6,9 @@
 
         <div class="search-input">
           <input v-model="city" @keyup.enter="getWeather" placeholder="Stadt eingeben">
-          <i class="fas fa-search"></i>
+          <button @click="getWeather" class="icon-button">
+            <i class="fas fa-search"></i>
+          </button>
         </div>
 
       </div>
