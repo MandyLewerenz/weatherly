@@ -14,7 +14,7 @@
       </div>
     </div>
     <div v-if="weatherData.length" class="row justify-content-md-around justify-content-center flex-fill show-weather">
-      <div v-for="weather in weatherData" :key="weather.id" class="col-10 col-md-3 ">
+      <div v-for="weather in weatherData" :key="weather.weekday" class="col-10 col-md-3 ">
         <div class="info-weather px-4">
 
           <div class="row border-date">
@@ -91,6 +91,7 @@ export default {
           let forecastResponse = await fetch(
             process.env.VUE_APP_API_FORECAST + `?lat=${this.coord.coord.lat}&lon=${this.coord.coord.lon}&lang=de&exclude=daily&units=metric&appid=` + process.env.VUE_APP_API_KEY
           );
+
           if (currentWeatherResponse.ok && forecastResponse.ok) {
 
             // Options for formatting the date
@@ -132,9 +133,6 @@ export default {
     },
     processForecastData(apiWeatherData, dateOptions) {
       const currentDate = new Date();
-
-      console.log(currentDate);
-
       const getWeatherDataForDaysAhead = (daysAhead) => {
         const date = new Date(currentDate);
         date.setDate(currentDate.getDate() + daysAhead);
@@ -159,8 +157,6 @@ export default {
       //Get weatherData for the day after tommorow
       this.weatherData.push(getWeatherDataForDaysAhead(2));
 
-      console.log(this.weatherData);
-
       // Function to calculate the day difference for an item to the currentDate
       function calculateDayDifference(itemDate) {
 
@@ -171,7 +167,6 @@ export default {
         currentDateCopy.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
 
         const daysDifference = Math.floor((itemDateCopy - currentDateCopy) / (24 * 60 * 60 * 1000));
-        console.log("Daydifference: " + daysDifference);
         return daysDifference;
       }
 
